@@ -338,10 +338,10 @@ rule make_stats:
 
 rule run_git:
     input:
-        DATA+"/dnadiff/out.report",
-        DATA+"/pgap/annot.gbk",
+        ([] if 'skip_unicycler' in config else DATA+"/dnadiff/out.report"),
+        (DATA+"/pgap/annot.gbk" if 'pgap_dir' in config else []),
         DATA+"/prokka/output.gbk",
-        DATA+"/bakta/output.gbff",
+        (DATA+"/bakta/output.gbff" if 'bakta_db' in config else []),
         DATA+"/final.gbk",
         DATA+"/busco/report.txt",
         DATA+"/stats.tsv"
