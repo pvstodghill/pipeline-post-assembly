@@ -1,0 +1,69 @@
+########################################################################
+# Basic parameters
+########################################################################
+
+# # Where to put output files
+# data: data
+
+strain: FIXME
+version: 
+
+gram: neg
+genus: FIXME
+species: FIXME
+
+########################################################################
+# Inputs data
+########################################################################
+
+# Use these values to process results of pipeline-autocycler.
+
+raw_long_fq: data/inputs/raw_nanopore.fastq.gz
+raw_R1_fq: data/inputs/raw_short_R1.fastq.gz
+raw_R2_fq: data/inputs/raw_short_R2.fastq.gz
+
+filtered_long_fq: data/filtlong/filtered_nanopore.fastq.gz
+trimmed_R1_fq: data/fastp/trimmed_R1.fastq.gz
+trimmed_R2_fq: data/fastp/trimmed_R2.fastq.gz
+
+raw_fa: data/pypolca/pypolca_corrected.fasta
+
+########################################################################
+# Known after assembly
+########################################################################
+
+# The linear contigs.
+# - These contigs will not be rotated to a heuristically better origin.
+# - The names used are the ones assigned by `normalize_assembly`
+#   (e.g., "J22c_plasmidD"). So, this stage might have to be run twice.
+# - Names are comma separated with no spaces.
+linear_contigs: 
+
+########################################################################
+# Unicycler + DNADiff
+########################################################################
+
+# # By default, compare "raw_fa" to  Unicycler reassembly using DNADiff.
+# # Uncomment to skip.
+# skip_unicycler: yes
+
+########################################################################
+# PGAP parameters
+########################################################################
+
+pgap_dir: ~/scratch/pgap
+
+########################################################################
+# BAKTA parameters
+########################################################################
+
+bakta_db: ~/scratch/bakta/db
+
+########################################################################
+# BUSCO parameters
+########################################################################
+
+busco_lineage:  # use --auto-lineage-prok
+#busco_lineage: FIXME # consult busco --list-datasets
+# busco_lineage: enterobacterales
+
