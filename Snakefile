@@ -32,7 +32,7 @@ rule run_unicycler:
             
 
 # ------------------------------------------------------------------------
-# Compare Trycycler and Unicycler results with `dnadiff`
+# Compare input genome and Unicycler results with `dnadiff`
 # ------------------------------------------------------------------------
 
 rule run_dnadiff:
@@ -44,10 +44,10 @@ rule run_dnadiff:
     shell:
         """
         dir=$(dirname {output})
-        cp {input.raw} $dir/reference.fasta
+        cp {input.raw} $dir/raw.fasta
         cp {input.unic} $dir/unicycler.fasta
         cd $dir
-        dnadiff trycycler.fasta unicycler.fasta
+        dnadiff raw.fasta unicycler.fasta
         """
 
 # ------------------------------------------------------------------------
