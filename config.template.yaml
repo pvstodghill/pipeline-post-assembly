@@ -6,7 +6,7 @@
 # data: data
 
 strain: FIXME
-version: 
+#version: 
 
 gram: neg
 genus: FIXME
@@ -32,12 +32,12 @@ raw_fa: data/pypolca/pypolca_corrected.fasta
 # Known after assembly
 ########################################################################
 
-# The linear contigs.
-# - These contigs will not be rotated to a heuristically better origin.
-# - The names used are the ones assigned by `normalize_assembly`
-#   (e.g., "J22c_plasmidD"). So, this stage might have to be run twice.
-# - Names are comma separated with no spaces.
-linear_contigs: 
+# # The linear contigs.
+# # - These contigs will not be rotated to a heuristically better origin.
+# # - The names used are the ones assigned by `normalize_assembly`
+# #   (e.g., "J22c_plasmidD"). So, this stage might have to be run twice.
+# # - Names are comma separated with no spaces.
+# linear_contigs: 
 
 ########################################################################
 # Unicycler + DNADiff
