@@ -374,7 +374,7 @@ rule make_summary:
             head -n13 {input.dnadiff_report}  | tail -n+4
             echo
             echo === stats ===
-            cat {input.stats_tsv} | tsv2grid -t
+            cat {input.stats_tsv} | datamash transpose | ( printf '%s\n' .TS 'box;LL.' ; cat ; printf '%s\n' .TE '.pl 0') | tbl | nroff
         ) | tee {output}
         """
 
