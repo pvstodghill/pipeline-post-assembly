@@ -366,6 +366,7 @@ rule make_summary:
         dnadiff_report=DATA+"/dnadiff/out.report",
         stats_tsv=DATA+"/stats.tsv"
     output: DATA+"/summary-post-assembly.log"
+    conda: "envs/datamash.yaml"
     shell:
         """
         (
