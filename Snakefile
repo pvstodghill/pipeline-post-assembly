@@ -320,7 +320,7 @@ rule make_stats:
     params:
         args="-q -s",
         strain=get_config('strain'),
-        version=get_config('version'),
+        version=get_config('version',''),
     threads: 9999
     conda: "envs/make_stats.yaml"
     shell:
