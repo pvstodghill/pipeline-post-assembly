@@ -357,9 +357,33 @@ rule run_git:
 	) 2>&1 | tee {output}
         """ 
 
+# ------------------------------------------------------------------------
+# Generate the summary
+# ------------------------------------------------------------------------
+
+rule make_summary:
+    input:
+        dnadiff_report=DATA+"/dnadiff/out.report",
+        stats_tsv=DATA+"/stats.tsv"
+    output: DATA+"/summary-post-assembly.log"
+    shell:
+        """
+        (
+            echo 
+            echo === autocycler vs. unicycler ===
+            head -n13 {input.dnadiff_report}  | tail -n+4
+            echo
+            echo === stats ===
+            cat {input.stats_tsv} | tsv2grid -t
+        ) | tee {output}
+        """
+
+
 # ========================================================================
 
 rule all:
-    input: DATA+"/git-post-assembly.log"
+    input:
+        DATA+"/summary-post-assembly.log",
+        DATA+"/git-post-assembly.log"
     default_target: True
 
