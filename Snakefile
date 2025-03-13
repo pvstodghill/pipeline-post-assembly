@@ -9,15 +9,36 @@ PIPELINE=os.path.dirname(workflow.snakefile)
 def get_config(name, default=None):
     return config[name] if name in config else default
 
+def flatten(alist):
+    if alist == []:
+        return []
+    elif type(alist) is not list:
+        return [alist]
+    else:
+        return flatten(alist[0]) + flatten(alist[1:])
+    
+def get_input_files(name):
+    if name not in config:
+        return []
+    l = config[name]
+    if not isinstance(l, list):
+        l = [l]
+    l = [os.path.expanduser(p) for p in l]
+    l = [glob.glob(p) for p in l]
+    l = flatten(l)
+    if l == []:
+        raise FileNotFoundError('input files for \''+name+'\' not found.')
+    return l
+
 # ------------------------------------------------------------------------
 # Run Unicycler
 # ------------------------------------------------------------------------
 
 rule run_unicycler:
     input:
-        short_r1=os.path.expanduser(config['trimmed_R1_fq']),
-        short_r2=os.path.expanduser(config['trimmed_R2_fq']),
-        long_reads=os.path.expanduser(config['filtered_long_fq'])
+        short_r1=get_input_files('trimmed_R1_fq'),
+        short_r2=get_input_files('trimmed_R2_fq'),
+        long_reads=get_input_files('filtered_long_fq')
     output: DATA+"/unicycler/assembly.fasta"
     threads: 9999
     conda: "envs/unicycler.yaml"
@@ -29,7 +50,6 @@ rule run_unicycler:
           -l {input.long_reads} \
           -o $(dirname {output})
         """
-            
 
 # ------------------------------------------------------------------------
 # Compare input genome and Unicycler results with `dnadiff`
@@ -37,7 +57,7 @@ rule run_unicycler:
 
 rule run_dnadiff:
     input:
-        raw=os.path.expanduser(config['assembly_fa']),
+        raw=get_input_files('assembly_fa'),
         unic=DATA+"/unicycler/assembly.fasta"
     output: DATA+"/dnadiff/out.report"
     conda: "envs/mummer4.yaml"
@@ -55,7 +75,7 @@ rule run_dnadiff:
 # ------------------------------------------------------------------------
 
 rule normalize_genome:
-    input: os.path.expanduser(config['assembly_fa'])
+    input: get_input_files('assembly_fa')
     output: DATA+"/normalized/normalized.fasta"
     params:
         strain=get_config('strain'),
@@ -93,7 +113,7 @@ if get_config('pgap_dir') != None:
             gbk=DATA+"/pgap/annot.gbk",
             gff=DATA+"/pgap/annot.gff",
         params:
-            pgap_dir=os.path.expanduser(get_config('pgap_dir')),
+            pgap_dir=get_input_files('pgap_dir'),
             strain=get_config('strain'),
             version=get_config('version',''),
             genus=get_config('genus','FIXME'),
@@ -308,12 +328,12 @@ rule generate_busco_summary:
 
 rule make_stats:
     input:
-        raw_long=os.path.expanduser(config['raw_long_fq']),
-        filtered_long=os.path.expanduser(config['filtered_long_fq']),
-        raw_r1=os.path.expanduser(config['raw_R1_fq']),
-        raw_r2=os.path.expanduser(config['raw_R2_fq']),
-        trimmed_r1=os.path.expanduser(config['trimmed_R1_fq']),
-        trimmed_r2=os.path.expanduser(config['trimmed_R2_fq']),
+        raw_long=get_input_files('raw_long_fq'),
+        filtered_long=get_input_files('filtered_long_fq'),
+        raw_r1=get_input_files('raw_R1_fq') if 'raw_R1_fq' in config else [],
+        raw_r2=get_input_files('raw_R2_fq') if 'raw_R2_fq' in config else [],
+        trimmed_r1=get_input_files('trimmed_R1_fq') if 'trimmed_R1_fq' in config else [],
+        trimmed_r2=get_input_files('trimmed_R2_fq') if 'trimmed_R2_fq' in config else [],
         final_fna=DATA+"/final.fna",
         final_gff=DATA+"/final.gff",
     output: DATA+"/stats.tsv"
@@ -336,15 +356,46 @@ rule make_stats:
             | tee {output}
         """
 
-rule run_git:
+# ------------------------------------------------------------------------
+# Generate the summary
+# ------------------------------------------------------------------------
+
+rule make_summary:
     input:
-        ([] if 'skip_unicycler' in config else DATA+"/dnadiff/out.report"),
-        (DATA+"/pgap/annot.gbk" if 'pgap_dir' in config else []),
-        DATA+"/prokka/output.gbk",
-        (DATA+"/bakta/output.gbff" if 'bakta_db' in config else []),
-        DATA+"/final.gbk",
-        DATA+"/busco/report.txt",
-        DATA+"/stats.tsv"
+        dnadiff_report=(DATA+"/dnadiff/out.report" if 'skip_unicycler' not in config and 'trimmed_R1_fq' in config else []),
+        stats_tsv=DATA+"/stats.tsv",
+        busco_txt=DATA+"/busco/report.txt",
+        _pgap_gbk=(DATA+"/pgap/annot.gbk" if 'pgap_dir' in config else []),
+        _prokka_gbk=DATA+"/prokka/output.gbk",
+        _bakta_gbk=(DATA+"/bakta/output.gbff" if 'bakta_db' in config else []),
+        _final_gbk=DATA+"/final.gbk",
+    output: DATA+"/summary-post-assembly.log"
+    conda: "envs/datamash.yaml"
+    shell:
+        """
+        (
+            if [ "{input.dnadiff_report}" ] ; then
+                echo 
+                echo === autocycler vs. unicycler ===
+                head -n13 {input.dnadiff_report}  | tail -n+4
+            fi
+            echo
+            echo === stats ===
+            cat {input.stats_tsv} | datamash transpose | ( printf '%s\n' .TS 'box;LL.' ; cat ; printf '%s\n' .TE '.pl 0') | tbl | nroff
+            echo
+            echo === busco ===
+            cat {input.busco_txt} | datamash transpose | ( printf '%s\n' .TS 'box;LL.' ; cat ; printf '%s\n' .TE '.pl 0') | tbl | nroff
+            echo
+        ) | tee {output}
+        """
+
+
+# ------------------------------------------------------------------------
+# Check Git status
+# ------------------------------------------------------------------------
+
+rule run_git:
+    input: DATA+"/summary-post-assembly.log"
     output: DATA+"/git-post-assembly.log"
     shell:
         """
@@ -358,29 +409,8 @@ rule run_git:
         """ 
 
 # ------------------------------------------------------------------------
-# Generate the summary
+# Entry point
 # ------------------------------------------------------------------------
-
-rule make_summary:
-    input:
-        dnadiff_report=DATA+"/dnadiff/out.report",
-        stats_tsv=DATA+"/stats.tsv"
-    output: DATA+"/summary-post-assembly.log"
-    conda: "envs/datamash.yaml"
-    shell:
-        """
-        (
-            echo 
-            echo === autocycler vs. unicycler ===
-            head -n13 {input.dnadiff_report}  | tail -n+4
-            echo
-            echo === stats ===
-            cat {input.stats_tsv} | datamash transpose | ( printf '%s\n' .TS 'box;LL.' ; cat ; printf '%s\n' .TE '.pl 0') | tbl | nroff
-        ) | tee {output}
-        """
-
-
-# ========================================================================
 
 rule all:
     input:
