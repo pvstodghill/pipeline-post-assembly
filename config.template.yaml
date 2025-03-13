@@ -26,7 +26,7 @@ filtered_long_fq: data/filtlong/filtered_nanopore.fastq.gz
 trimmed_R1_fq: data/fastp/trimmed_R1.fastq.gz
 trimmed_R2_fq: data/fastp/trimmed_R2.fastq.gz
 
-raw_fa: data/pypolca/pypolca_corrected.fasta
+assembly_fa: data/intermediate.fasta
 
 ########################################################################
 # Known after assembly

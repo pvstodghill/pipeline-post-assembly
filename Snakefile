@@ -37,7 +37,7 @@ rule run_unicycler:
 
 rule run_dnadiff:
     input:
-        raw=os.path.expanduser(config['raw_fa']),
+        raw=os.path.expanduser(config['assembly_fa']),
         unic=DATA+"/unicycler/assembly.fasta"
     output: DATA+"/dnadiff/out.report"
     conda: "envs/mummer4.yaml"
@@ -55,7 +55,7 @@ rule run_dnadiff:
 # ------------------------------------------------------------------------
 
 rule normalize_genome:
-    input: os.path.expanduser(config['raw_fa'])
+    input: os.path.expanduser(config['assembly_fa'])
     output: DATA+"/normalized/normalized.fasta"
     params:
         strain=get_config('strain'),
