@@ -383,7 +383,7 @@ rule make_summary:
             cat {input.stats_tsv} | datamash transpose | ( printf '%s\n' .TS 'box;LL.' ; cat ; printf '%s\n' .TE '.pl 0') | tbl | nroff
             echo
             echo === busco ===
-            cat {input.busco_txt} | datamash transpose | ( printf '%s\n' .TS 'box;LL.' ; cat ; printf '%s\n' .TE '.pl 0') | tbl | nroff
+            cat {input.busco_txt} | sed -e 's|/|\t|g' -e s/short_summary.specific.// -e s/.output.txt:// | datamash transpose | ( printf '%s\n' .TS 'box;LL.' ; cat ; printf '%s\n' .TE '.pl 0') | tbl | nroff
             echo
         ) | tee {output}
         """
