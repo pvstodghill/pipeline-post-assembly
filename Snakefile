@@ -348,10 +348,10 @@ rule make_stats:
         {PIPELINE}/scripts/compute-assembly-stats \
             -t {threads} \
             {params.args} -S {params.strain}{params.version} \
-            "{input.raw_long}" "{input.filtered_long}" \
-            "{input.raw_r1}" "{input.raw_r2}" \
-            "{input.trimmed_r1}" "{input.trimmed_r2}" \
-            "{input.final_fna}" "{input.final_gff}" \
+            {input.raw_long} {input.filtered_long} \
+            {input.raw_r1} {input.raw_r2} \
+            {input.trimmed_r1} {input.trimmed_r2} \
+            {input.final_fna} {input.final_gff} \
             | tee {output}
         """
 
