@@ -16,7 +16,7 @@ species: FIXME
 # Inputs data
 ########################################################################
 
-# Use these values to process results of pipeline-autocycler.
+# Use these values to process results of pipeline-assembly.
 
 raw_long_fq: data/inputs/raw_nanopore.fastq.gz
 raw_R1_fq: data/inputs/raw_short_R1.fastq.gz
