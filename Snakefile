@@ -332,6 +332,11 @@ rule make_summary:
     shell:
         """
         (
+            if [ -e {DATA}/pgap/ani-tax-report.txt ] ; then
+                echo === pgap ani ===
+        	cat {DATA}/pgap/ani-tax-report.txt | tail -n+2 | head -n5
+                echo
+            fi
             echo === stats ===
             cat {input.stats_tsv} | datamash transpose | ( printf '%s\n' .TS 'box;LL.' ; cat ; printf '%s\n' .TE '.pl 0') | tbl | nroff
             echo
