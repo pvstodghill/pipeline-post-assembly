@@ -239,7 +239,8 @@ rule run_busco:
     input: DATA+"/final.faa"
     output: DATA+"/busco/done.txt"
     params:
-        lineage_arg = ('--lineage_dataset '+config['busco_lineage']) if 'busco_lineage' in config else '--auto-lineage-prok'
+        lineage_arg = ('--lineage_dataset '+config['busco_lineage']) \
+            if get_config('busco_lineage') != None else '--auto-lineage-prok'
     threads: 9999
     conda: "envs/busco.yaml"
     shell:
