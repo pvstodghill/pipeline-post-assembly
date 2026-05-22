@@ -18,11 +18,11 @@ species: FIXME
 
 # Use these values to process results of pipeline-assembly.
 
-raw_long_fq: data/inputs/raw_nanopore.fastq.gz
+raw_long_fq: data/inputs/raw_long.fastq.gz
 raw_R1_fq: data/inputs/raw_short_R1.fastq.gz
 raw_R2_fq: data/inputs/raw_short_R2.fastq.gz
 
-filtered_long_fq: data/filtlong/filtered_nanopore.fastq.gz
+filtered_long_fq: data/filtlong/filtered_long.fastq.gz
 trimmed_R1_fq: data/fastp/trimmed_R1.fastq.gz
 trimmed_R2_fq: data/fastp/trimmed_R2.fastq.gz
 
